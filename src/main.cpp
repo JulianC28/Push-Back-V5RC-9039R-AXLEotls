@@ -4,7 +4,7 @@
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER); // sets up controller
 pros::MotorGroup rightDrive({1, -2, 3}, pros::MotorGearset::blue); // creates the right drivetrain motor group with forwards ports 1 & 3 and backwards port 2
-pros::MotorGroup leftDrive({4, -5, 6}, pros::MotorGearset::blue); // creates the left drivetrain motor group with forwards ports 4 & 6 and backwards port 5
+pros::MotorGroup leftDrive({-4, 5, -6}, pros::MotorGearset::blue); // creates the left drivetrain motor group with forwards port 5 and backwards ports 4 & 6
 
 // drivetrain settingsMore actions
 lemlib::Drivetrain drivetrain(&leftDrive, // left motor group
@@ -64,7 +64,43 @@ lemlib::Chassis chassis(drivetrain, // drivetrain settings
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	
+    chassis.calibrate(); // calibrate sensors
+    pros::lcd::initialize();
+}
+
+/**
+ * Displays data for sensors, battery, and motors.
+ * 
+ * Uses the LCD display on the brain to display the data.
+ */
+void dataDisplay () {
+    while(true){
+        int rightPower1 = rightDrive.get_power(1); // outputs the power from the first motor in the right motor group in watts
+        int rightPower2 = rightDrive.get_power(2); // outputs the power from the second motor in the right motor group in watts
+        int rightPower3 = rightDrive.get_power(3); // outputs the power from the third motor in the right motor group in watts
+    
+        int leftPower1 = leftDrive.get_power(1); // outputs the power from the first motor in the left motor group in watts
+        int leftPower2 = leftDrive.get_power(2); // outputs the power from the second motor in the left motor group in watts
+        int leftPower3 = leftDrive.get_power(3); // outputs the power from the third motor in the left motor group in watts
+    
+        double batteryPercent = pros::battery::get_capacity();
+
+        pros::lcd::clear();
+
+        pros::lcd::print(1, "Data n' Stuff:");
+        pros::lcd::print(2, "Right Motor 1 (Port 1) Power: %dW", rightPower1);
+        pros::lcd::print(3, "Right Motor 2 (Port 2) Power: %dW", rightPower2);
+        pros::lcd::print(4, "Right Motor 3 (Port 3) Power: %dW", rightPower3);
+        pros::lcd::print(5, "Left Motor 1 (Port 4) Power: %dW", leftPower1);
+        pros::lcd::print(6, "Left Motor 2 (Port 5) Power: %dW", leftPower2);
+        pros::lcd::print(7, "Left Motor 3 (Port 6) Power: %dW", leftPower3);
+        pros::lcd::print(8, "Battery Percentage: %d%", batteryPercent);
+
+        controller.clear();
+        controller.print(0, 0, "Battery: %d%", batteryPercent);
+
+        pros::delay(50);
+    }
 }
 
 /**
@@ -72,7 +108,9 @@ void initialize() {
  * the VEX Competition Switch, following either autonomous or opcontrol. When
  * the robot is enabled, this task will exit.
  */
-void disabled() {}
+void disabled() {
+    
+}
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
