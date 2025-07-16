@@ -5,13 +5,26 @@
 int red, green;
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER); // sets up controller
+
+pros::Motor right1(1);
+pros::Motor right2(2);
+pros::Motor right3(-3);
+pros::Motor left1(-4);
+pros::Motor left2(5);
+pros::Motor left3(-6);
+
 pros::MotorGroup rightDrive({1, 2, -3}, pros::MotorGearset::blue); // creates the right drivetrain motor group with forwards ports 1 & 3 and backwards port 2
 pros::MotorGroup leftDrive({-4, 5, -6}, pros::MotorGearset::blue); // creates the left drivetrain motor group with forwards port 5 and backwards ports 4 & 6
+pros::Motor intake(7);
+
+pros::IMU imu(8);
+
+pros::ADIAnalogOut tongueMech = pros::ADIAnalogOut('C');
 
 // drivetrain settingsMore actions
 lemlib::Drivetrain drivetrain(&leftDrive, // left motor group
 							  &rightDrive, // right motor group
-							  15.5, // 13.5 inch track width (NEEDS TO BE MEASURED)
+							  12.5, // 13.5 inch track width (NEEDS TO BE MEASURED)
 							  lemlib::Omniwheel::NEW_325, // using new 3.25" omnis
 							  480, // drivetrain rpm is 480 rpm
 							  2 // horizontal drift is 2 (for now)
@@ -23,7 +36,7 @@ lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel 1, set to null (
   							nullptr, // vertical tracking wheel 2, set to null
   							nullptr, // horizontal tracking wheel 1, set to null (temporary hopefully)
   							nullptr, // horizontal tracking wheel 2, set to null
-  							nullptr // inertial sensor, set to null (temporary)
+  							&imu // inertial sensor, set to null (temporary)
 );
 
 
@@ -74,16 +87,16 @@ void initialize() {
  * Displays data for sensors, battery, and motors.
  * 
  * Uses the LCD display on the brain to display the data.
- */
+ 
 void dataDisplay () {
     while(true){
-        int rightPower1 = rightDrive.get_power(1); // outputs the power from the first motor in the right motor group in watts
-        int rightPower2 = rightDrive.get_power(2); // outputs the power from the second motor in the right motor group in watts
-        int rightPower3 = rightDrive.get_power(3); // outputs the power from the third motor in the right motor group in watts
+        int rightPower1 = right1.get_power(); // outputs the power from the first motor in the right motor group in watts
+        int rightPower2 = right2.get_power(); // outputs the power from the second motor in the right motor group in watts
+        int rightPower3 = right3.get_power(); // outputs the power from the third motor in the right motor group in watts
     
-        int leftPower1 = leftDrive.get_power(1); // outputs the power from the first motor in the left motor group in watts
-        int leftPower2 = leftDrive.get_power(2); // outputs the power from the second motor in the left motor group in watts
-        int leftPower3 = leftDrive.get_power(3); // outputs the power from the third motor in the left motor group in watts
+        int leftPower1 = left1.get_power(); // outputs the power from the first motor in the left motor group in watts
+        int leftPower2 = left2.get_power(); // outputs the power from the second motor in the left motor group in watts
+        int leftPower3 = left3.get_power(); // outputs the power from the third motor in the left motor group in watts
     
         int batteryPercent = pros::battery::get_capacity();
 
@@ -102,12 +115,38 @@ void dataDisplay () {
         pros::screen::print(TEXT_MEDIUM, 7, "Left Motor 3 (Port 6) Power: %dW", leftPower3);
         pros::screen::print(TEXT_MEDIUM, 8, "Battery Percentage: %d %", batteryPercent);
 
-        controller.clear();
-        controller.print(0, 0, "Battery: %d %", batteryPercent);
-
         pros::delay(50);
     }
 }
+
+void logTask() {
+    int time = 0;
+
+    while (true) {
+        int rightPower1 = right1.get_power(); // outputs the power from the first motor in the right motor group in watts
+        int rightPower2 = right2.get_power(); // outputs the power from the second motor in the right motor group in watts
+        int rightPower3 = right3.get_power(); // outputs the power from the third motor in the right motor group in watts
+    
+        int leftPower1 = left1.get_power(); // outputs the power from the first motor in the left motor group in watts
+        int leftPower2 = left2.get_power(); // outputs the power from the second motor in the left motor group in watts
+        int leftPower3 = left3.get_power(); // outputs the power from the third motor in the left motor group in watts
+        
+        std::string logMessage = std::to_string(time) +
+            "," + std::to_string(rightPower1) + 
+            "," + std::to_string(rightPower2) + 
+            "," + std::to_string(rightPower3) + 
+            "," + std::to_string(leftPower1) + 
+            "," + std::to_string(leftPower2) + 
+            "," + std::to_string(leftPower3) + "\n";
+
+        printf(logMessage.c_str());
+
+        time += 10;
+
+        pros::delay(10);
+    }
+}
+*/
 
 /**
  * Runs while the robot is in the disabled state of Field Management System or
@@ -140,7 +179,10 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+    chassis.setPose(0, 0, 0);
+    chassis.moveToPoint(0, 20, 10000);
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -156,14 +198,62 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+    chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
 
-    dataDisplay();
+    int time = 0;
 
 	while (true) {
+
+        int rightPower1 = right1.get_power(); // outputs the power from the first motor in the right motor group in watts
+        int rightPower2 = right2.get_power(); // outputs the power from the second motor in the right motor group in watts
+        int rightPower3 = right3.get_power(); // outputs the power from the third motor in the right motor group in watts
+    
+        int leftPower1 = left1.get_power(); // outputs the power from the first motor in the left motor group in watts
+        int leftPower2 = left2.get_power(); // outputs the power from the second motor in the left motor group in watts
+        int leftPower3 = left3.get_power(); // outputs the power from the third motor in the left motor group in watts
+        
+        std::string logMessage = std::to_string(time) +
+            "," + std::to_string(rightPower1) + 
+            "," + std::to_string(rightPower2) + 
+            "," + std::to_string(rightPower3) + 
+            "," + std::to_string(leftPower1) + 
+            "," + std::to_string(leftPower2) + 
+            "," + std::to_string(leftPower3) + "\n";
+
+        printf(logMessage.c_str());
+
+        time += 25;
+
+        int batteryPercent = pros::battery::get_capacity();
+
+        red = 510 - (batteryPercent*5.1);
+        green = batteryPercent*5.1;
+
+        pros::screen::erase();
+        
+        pros::screen::set_pen(RGB2COLOR(red, green, 20));
+        pros::screen::print(TEXT_MEDIUM, 1, "Data n' Stuff:");
+        pros::screen::print(TEXT_MEDIUM, 2, "Right Motor 1 (Port 1) Power: %dW", rightPower1);
+        pros::screen::print(TEXT_MEDIUM, 3, "Right Motor 2 (Port 2) Power: %dW", rightPower2);
+        pros::screen::print(TEXT_MEDIUM, 4, "Right Motor 3 (Port 3) Power: %dW", rightPower3);
+        pros::screen::print(TEXT_MEDIUM, 5, "Left Motor 1 (Port 4) Power: %dW", leftPower1);
+        pros::screen::print(TEXT_MEDIUM, 6, "Left Motor 2 (Port 5) Power: %dW", leftPower2);
+        pros::screen::print(TEXT_MEDIUM, 7, "Left Motor 3 (Port 6) Power: %dW", leftPower3);
+        pros::screen::print(TEXT_MEDIUM, 8, "Battery Percentage: %d %", batteryPercent);
 
 		int tankLeft = controller.get_analog(ANALOG_LEFT_Y); // the left analog stick controls the left side of the drive train
         int tankRight = controller.get_analog(ANALOG_RIGHT_Y); // the right analog stick controls the left side of the drive train        
         chassis.tank(tankLeft, tankRight); // creates a tank drive scheme
+
+        if(controller.get_digital(DIGITAL_R1)){
+            intake.move(127);
+        }
+        else if(controller.get_digital(DIGITAL_R2)){
+            intake.move(-127);
+        }
+        else{
+            intake.move(0);
+        }
 
 		pros::delay(25); // wait 25ms to save resources
 	}
