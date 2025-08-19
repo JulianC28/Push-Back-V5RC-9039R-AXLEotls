@@ -15,11 +15,14 @@ pros::Motor left3(-6);
 
 pros::MotorGroup rightDrive({1, 2, -3}, pros::MotorGearset::blue); // creates the right drivetrain motor group with forwards ports 1 & 3 and backwards port 2
 pros::MotorGroup leftDrive({-4, 5, -6}, pros::MotorGearset::blue); // creates the left drivetrain motor group with forwards port 5 and backwards ports 4 & 6
-pros::Motor intake(7);
+pros::Motor roller1(7);
+pros::Motor roller2(8);
+pros::Motor roller3(9);
+pros::Motor roller4(10);
 
-pros::IMU imu(8);
+pros::IMU imu(11);
 
-pros::ADIAnalogOut tongueMech = pros::ADIAnalogOut('C');
+pros::adi::DigitalOut toungeMech('H');
 
 // drivetrain settingsMore actions
 lemlib::Drivetrain drivetrain(&leftDrive, // left motor group
@@ -244,18 +247,49 @@ void opcontrol() {
 		int tankLeft = controller.get_analog(ANALOG_LEFT_Y); // the left analog stick controls the left side of the drive train
         int tankRight = controller.get_analog(ANALOG_RIGHT_Y); // the right analog stick controls the left side of the drive train        
         chassis.tank(tankLeft, tankRight); // creates a tank drive scheme
-
+        /*
         if(controller.get_digital(DIGITAL_R1)){
-            intake.move(127);
+            roller1.move(127);
+            roller3.move(-127);
         }
         else if(controller.get_digital(DIGITAL_R2)){
-            intake.move(-127);
+            roller1.move(-127);
+            roller3.move(127);
         }
         else{
-            intake.move(0);
+            roller1.move(0);
+            roller3.move(0);
+        }
+        */
+
+        if(controller.get_digital(DIGITAL_R1)){
+            roller1.move(127);
+            roller2.move(-127);
+        } 
+        else if(controller.get_digital(DIGITAL_R2)){
+            roller1.move(127);
+            roller2.move(127);
+            roller3.move(-127);
+        }
+        else if(controller.get_digital(DIGITAL_L1)){
+            roller1.move(-127);
+            roller2.move(127);
+        }
+        else{
+            roller1.move(0);
+            roller2.move(0);
+            roller3.move(0);
+        }
+
+        
+
+        if(controller.get_digital(DIGITAL_UP)){
+            toungeMech.set_value(true);
+        }
+        else if(controller.get_digital(DIGITAL_DOWN)){
+            toungeMech.set_value(false);
         }
 
 		pros::delay(25); // wait 25ms to save resources
 	}
 }
-
