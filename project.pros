@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Push-Back-VRC-9039R-AXLEotls",
+    "project_name": "pid testing 2",
     "target": "v5",
     "templates": {
       "kernel": {
@@ -592,7 +592,7 @@
       }
     },
     "upload_options": {
-      "description": "8-19-25",
+      "description": "11-3-25",
       "icon": "planet"
     },
     "use_early_access": false

@@ -15,19 +15,24 @@ pros::Motor left3(-6);
 
 pros::MotorGroup rightDrive({1, 2, -3}, pros::MotorGearset::blue); // creates the right drivetrain motor group with forwards ports 1 & 3 and backwards port 2
 pros::MotorGroup leftDrive({-4, 5, -6}, pros::MotorGearset::blue); // creates the left drivetrain motor group with forwards port 5 and backwards ports 4 & 6
+
 pros::Motor roller1(7);
 pros::Motor roller2(8);
 pros::Motor roller3(9);
-pros::Motor roller4(10);
+pros::Motor roller4(11);
 
-pros::IMU imu(11);
+pros::IMU imu(10);
+
+pros::Rotation verticalRotationSensor(-12);
 
 pros::adi::DigitalOut toungeMech('H');
+
+lemlib::TrackingWheel verticalTrackingWheel(&verticalRotationSensor, lemlib::Omniwheel::NEW_275, 0);
 
 // drivetrain settingsMore actions
 lemlib::Drivetrain drivetrain(&leftDrive, // left motor group
 							  &rightDrive, // right motor group
-							  12.5, // 13.5 inch track width (NEEDS TO BE MEASURED)
+							  12.5, // 12.5 inch track width (NEEDS TO BE MEASURED)
 							  lemlib::Omniwheel::NEW_325, // using new 3.25" omnis
 							  480, // drivetrain rpm is 480 rpm
 							  2 // horizontal drift is 2 (for now)
@@ -35,7 +40,7 @@ lemlib::Drivetrain drivetrain(&leftDrive, // left motor group
 
 
 // odometry settings
-lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel 1, set to null (temporary)
+lemlib::OdomSensors sensors(&verticalTrackingWheel, // vertical tracking wheel 1, set to null (temporary)
   							nullptr, // vertical tracking wheel 2, set to null
   							nullptr, // horizontal tracking wheel 1, set to null (temporary hopefully)
   							nullptr, // horizontal tracking wheel 2, set to null
@@ -44,26 +49,26 @@ lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel 1, set to null (
 
 
 // lateral PID controller
-lemlib::ControllerSettings lateral_controller(10, // proportional gain (kP)
+lemlib::ControllerSettings lateral_controller(15, // proportional gain (kP)
                                               0, // integral gain (kI)
-                                              3, // derivative gain (kD)
-                                              3, // anti windup
-                                              1, // small error range, in inches
-                                              100, // small error range timeout, in milliseconds
-                                              3, // large error range, in inches
-                                              500, // large error range timeout, in milliseconds
-                                              20 // maximum acceleration (slew)
+                                              5, // derivative gain (kD)
+                                              0, // anti windup
+                                              0, // small error range, in inches
+                                              0, // small error range timeout, in milliseconds
+                                              0, // large error range, in inches
+                                              0, // large error range timeout, in milliseconds
+                                              0 // maximum acceleration (slew)
 );
 
 // angular PID controller
-lemlib::ControllerSettings angular_controller(2, // proportional gain (kP)
+lemlib::ControllerSettings angular_controller(7, // proportional gain (kP)
                                               0, // integral gain (kI)
-                                              10, // derivative gain (kD)
-                                              3, // anti windup
-                                              1, // small error range, in degrees
-                                              100, // small error range timeout, in milliseconds
-                                              3, // large error range, in degrees
-                                              500, // large error range timeout, in milliseconds
+                                              100, // derivative gain (kD)
+                                              0, // anti windup
+                                              0, // small error range, in inches
+                                              0, // small error range timeout, in milliseconds
+                                              0, // large error range, in inches
+                                              0, // large error range timeout, in milliseconds
                                               0 // maximum acceleration (slew)
 );
 
@@ -183,8 +188,11 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+    
+
     chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(0, 20, 10000);
+    chassis.moveToPoint(0, 48, 9999999, {.maxSpeed = 70});
+
 }
 
 /**
@@ -201,7 +209,7 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-    chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+    chassis.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
 
     int time = 0;
 
@@ -230,7 +238,7 @@ void opcontrol() {
         int batteryPercent = pros::battery::get_capacity();
 
         red = 510 - (batteryPercent*5.1);
-        green = batteryPercent*5.1;
+        green = (batteryPercent*5.1);
 
         pros::screen::erase();
         
@@ -275,18 +283,23 @@ void opcontrol() {
             roller1.move(-127);
             roller2.move(127);
         }
+        else if(controller.get_digital(DIGITAL_L2)){
+            roller1.move(127);
+            roller2.move(127);
+            roller3.move(127);
+            roller4.move(127);
+        }
         else{
             roller1.move(0);
             roller2.move(0);
             roller3.move(0);
+            roller4.move(0);
         }
-
         
-
-        if(controller.get_digital(DIGITAL_UP)){
+        if(controller.get_digital(DIGITAL_B) || controller.get_digital(DIGITAL_Y)){
             toungeMech.set_value(true);
         }
-        else if(controller.get_digital(DIGITAL_DOWN)){
+        else if(controller.get_digital(DIGITAL_DOWN) || controller.get_digital(DIGITAL_RIGHT)){
             toungeMech.set_value(false);
         }
 
