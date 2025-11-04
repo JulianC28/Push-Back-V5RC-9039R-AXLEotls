@@ -51,8 +51,8 @@ lemlib::OdomSensors sensors(&verticalTrackingWheel, // vertical tracking wheel 1
 // lateral PID controller
 lemlib::ControllerSettings lateral_controller(15, // proportional gain (kP)
                                               0, // integral gain (kI)
-                                              5, // derivative gain (kD)
-                                              0, // anti windup
+                                              80, // derivative gain (kD)
+                                              1.275, // anti windup
                                               0, // small error range, in inches
                                               0, // small error range timeout, in milliseconds
                                               0, // large error range, in inches
@@ -189,10 +189,23 @@ void competition_initialize() {}
  */
 void autonomous() {
     
+    
 
     chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(0, 48, 9999999, {.maxSpeed = 70});
-
+    chassis.moveToPoint(0, 30, 1500, {.maxSpeed = 80});
+    chassis.turnToHeading(90, 750, {.maxSpeed = 100});
+    toungeMech.set_value(true);
+    chassis.moveToPoint(15, 30, 1000, {.maxSpeed = 70});
+    roller1.move_absolute(4000, 127);
+    roller2.move_absolute(5000, -127);
+    pros::delay(5000);
+    chassis.moveToPoint(0, 30, 1500, {.forwards = false, .maxSpeed = 80});
+    chassis.turnToHeading(-90, 1000, {.maxSpeed = 100});
+    chassis.moveToPoint(-20, 30, 1500, {.maxSpeed = 80});
+    roller1.move_absolute(4000, 127);
+    roller2.move_absolute(4000, 127);
+    roller3.move_absolute(4000, 127);
+    roller4.move_absolute(4000, 127);
 }
 
 /**
@@ -222,7 +235,7 @@ void opcontrol() {
         int leftPower1 = left1.get_power(); // outputs the power from the first motor in the left motor group in watts
         int leftPower2 = left2.get_power(); // outputs the power from the second motor in the left motor group in watts
         int leftPower3 = left3.get_power(); // outputs the power from the third motor in the left motor group in watts
-        
+        /*
         std::string logMessage = std::to_string(time) +
             "," + std::to_string(rightPower1) + 
             "," + std::to_string(rightPower2) + 
@@ -234,7 +247,7 @@ void opcontrol() {
         printf(logMessage.c_str());
 
         time += 25;
-
+        */
         int batteryPercent = pros::battery::get_capacity();
 
         red = 510 - (batteryPercent*5.1);
@@ -251,6 +264,8 @@ void opcontrol() {
         pros::screen::print(TEXT_MEDIUM, 6, "Left Motor 2 (Port 5) Power: %dW", leftPower2);
         pros::screen::print(TEXT_MEDIUM, 7, "Left Motor 3 (Port 6) Power: %dW", leftPower3);
         pros::screen::print(TEXT_MEDIUM, 8, "Battery Percentage: %d %", batteryPercent);
+        pros::screen::print(TEXT_SMALL, 9, "Battery Percentage: %d %", red);
+        pros::screen::print(TEXT_SMALL, 10, "Battery Percentage: %d %", green);
 
 		int tankLeft = controller.get_analog(ANALOG_LEFT_Y); // the left analog stick controls the left side of the drive train
         int tankRight = controller.get_analog(ANALOG_RIGHT_Y); // the right analog stick controls the left side of the drive train        
