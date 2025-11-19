@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "pid testing 2",
+    "project_name": "auton please",
     "target": "v5",
     "templates": {
       "kernel": {

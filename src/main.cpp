@@ -3,6 +3,7 @@
 #include "liblvgl/lvgl.h"
 
 int red, green;
+bool autonSelectorDone = false, rightAuton = false, leftAuton = false, offTheLineAuton = false, skillsAuton = false;
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER); // sets up controller
 
@@ -26,6 +27,7 @@ pros::IMU imu(10);
 pros::Rotation verticalRotationSensor(-12);
 
 pros::adi::DigitalOut toungeMech('H');
+pros::adi::DigitalOut wing('G');
 
 lemlib::TrackingWheel verticalTrackingWheel(&verticalRotationSensor, lemlib::Omniwheel::NEW_275, 0);
 
@@ -50,7 +52,7 @@ lemlib::OdomSensors sensors(&verticalTrackingWheel, // vertical tracking wheel 1
 
 // lateral PID controller
 lemlib::ControllerSettings lateral_controller(15, // proportional gain (kP)
-                                              0, // integral gain (kI)
+                                              1, // integral gain (kI)
                                               80, // derivative gain (kD)
                                               1.275, // anti windup
                                               0, // small error range, in inches
@@ -161,9 +163,7 @@ void logTask() {
  * the VEX Competition Switch, following either autonomous or opcontrol. When
  * the robot is enabled, this task will exit.
  */
-void disabled() {
-    
-}
+void disabled() {}
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
@@ -188,24 +188,83 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-    
-    
-
-    chassis.setPose(0, 0, 0);
-    chassis.moveToPoint(0, 30, 1500, {.maxSpeed = 80});
-    chassis.turnToHeading(90, 750, {.maxSpeed = 100});
-    toungeMech.set_value(true);
-    chassis.moveToPoint(15, 30, 1000, {.maxSpeed = 70});
-    roller1.move_absolute(4000, 127);
-    roller2.move_absolute(5000, -127);
-    pros::delay(5000);
-    chassis.moveToPoint(0, 30, 1500, {.forwards = false, .maxSpeed = 80});
-    chassis.turnToHeading(-90, 1000, {.maxSpeed = 100});
-    chassis.moveToPoint(-20, 30, 1500, {.maxSpeed = 80});
-    roller1.move_absolute(4000, 127);
-    roller2.move_absolute(4000, 127);
-    roller3.move_absolute(4000, 127);
-    roller4.move_absolute(4000, 127);
+    if(rightAuton == true){
+        chassis.setPose(0, 0, 0);
+        chassis.moveToPoint(0, 30, 1500, {.maxSpeed = 80});
+        chassis.turnToHeading(90, 750, {.maxSpeed = 100});
+        toungeMech.set_value(true);
+        pros::delay(500);
+        chassis.moveToPoint(13, 30, 1000, {.maxSpeed = 60});
+        roller1.move_absolute(5000, 1000);
+        roller2.move_absolute(-8000, 1000);
+        pros::delay(3500);
+        chassis.moveToPoint(-5, 30, 2000, {.forwards = false, .maxSpeed = 80});
+        pros::delay(500);
+        toungeMech.set_value(false);
+        roller1.move_absolute(6500, 1000);
+        pros::delay(1000);
+        chassis.turnToHeading(-90, 1000, {.maxSpeed = 100});
+        chassis.moveToPoint(-18, 30, 1500, {.maxSpeed = 80});
+        pros::delay(2000);
+        roller1.move_absolute(14500, 1000);
+        roller2.move_absolute(0, 1000);
+        roller3.move_absolute(8000, 1000);
+        roller4.move_absolute(8000, 1000);
+    }
+    else if(leftAuton == true){
+        chassis.setPose(0, 0, 0);
+        chassis.moveToPoint(0, 30, 1500, {.maxSpeed = 80});
+        chassis.turnToHeading(-90, 750, {.maxSpeed = 100});
+        toungeMech.set_value(true);
+        pros::delay(500);
+        chassis.moveToPoint(-13, 30, 1000, {.maxSpeed = 60});
+        roller1.move_absolute(5000, 1000);
+        roller2.move_absolute(-8000, 1000);
+        pros::delay(3500);
+        chassis.moveToPoint(5, 30, 2000, {.forwards = false, .maxSpeed = 80});
+        pros::delay(500);
+        toungeMech.set_value(false);
+        roller1.move_absolute(6500, 1000);
+        pros::delay(1000);
+        chassis.turnToHeading(90, 1000, {.maxSpeed = 100});
+        chassis.moveToPoint(18, 30, 1500, {.maxSpeed = 80});
+        pros::delay(2000);
+        roller1.move_absolute(14500, 1000);
+        roller2.move_absolute(0, 1000);
+        roller3.move_absolute(8000, 1000);
+        roller4.move_absolute(8000, 1000);
+    }
+    else if(offTheLineAuton == true){
+        chassis.setPose(0, 0, 0);
+        chassis.moveToPoint(0, 10, 1500, {.maxSpeed = 60});
+    }
+    else if(skillsAuton == true){
+        chassis.setPose(0, 0, 0);
+        chassis.moveToPoint(0, 30, 1500, {.maxSpeed = 80});
+        chassis.turnToHeading(90, 750, {.maxSpeed = 100});
+        toungeMech.set_value(true);
+        pros::delay(500);
+        chassis.moveToPoint(13, 30, 1000, {.maxSpeed = 60});
+        roller1.move_absolute(10000, 1000);
+        roller2.move_absolute(-16000, 1000);
+        pros::delay(7000);
+        chassis.moveToPoint(-5, 30, 2000, {.forwards = false, .maxSpeed = 80});
+        pros::delay(500);
+        toungeMech.set_value(false);
+        roller1.move_absolute(13000, 1000);
+        pros::delay(2000);
+        chassis.turnToHeading(-90, 1000, {.maxSpeed = 100});
+        chassis.moveToPoint(-18, 30, 1500, {.maxSpeed = 80});
+        pros::delay(2000);
+        roller1.move_absolute(29000, 1000);
+        roller2.move_absolute(0, 1000);
+        roller3.move_absolute(16000, 1000);
+        roller4.move_absolute(16000, 1000);
+        pros::delay(10000);
+        chassis.moveToPoint(0, 30, 2000, {.forwards = false, .maxSpeed = 80});
+        chassis.turnToHeading(180, 1000, {.maxSpeed = 100});
+        chassis.moveToPoint(0, -20, 3000, {.minSpeed = 100});
+    }
 }
 
 /**
@@ -226,7 +285,31 @@ void opcontrol() {
 
     int time = 0;
 
-	while (true) {
+    while(autonSelectorDone == false){
+        pros::screen::print(TEXT_MEDIUM, 1, "PRESS A FOR RIGHT AUTON");
+        pros::screen::print(TEXT_MEDIUM, 2, "PRESS B FOR LEFT AUTON");
+        pros::screen::print(TEXT_MEDIUM, 3, "PRESS X FOR JUST OFF THE LINE");
+        pros::screen::print(TEXT_MEDIUM, 4, "PRESS Y FOR SKILLS AUTON");
+
+        if(controller.get_digital(DIGITAL_A)){
+            rightAuton = true;
+            autonSelectorDone = true;
+        }
+        else if(controller.get_digital(DIGITAL_B)){
+            leftAuton = true;
+            autonSelectorDone = true;
+        }
+        else if(controller.get_digital(DIGITAL_X)){
+            offTheLineAuton = true;
+            autonSelectorDone = true;
+        }
+        else if(controller.get_digital(DIGITAL_Y)){
+            skillsAuton = true;
+            autonSelectorDone = true;
+        }
+    }
+
+	while (autonSelectorDone == true) {
 
         int rightPower1 = right1.get_power(); // outputs the power from the first motor in the right motor group in watts
         int rightPower2 = right2.get_power(); // outputs the power from the second motor in the right motor group in watts
@@ -250,9 +333,21 @@ void opcontrol() {
         */
         int batteryPercent = pros::battery::get_capacity();
 
-        red = 510 - (batteryPercent*5.1);
-        green = (batteryPercent*5.1);
+        int red, green;
 
+        if(batteryPercent > 50){
+            green = 255;
+            red = 510 - (batteryPercent*5.1);
+        }
+        else if(batteryPercent < 50){
+            green = batteryPercent*5.1;
+            red = 255;
+        }
+        else{
+            green = 255;
+            red = 255;
+        }
+        
         pros::screen::erase();
         
         pros::screen::set_pen(RGB2COLOR(red, green, 20));
@@ -264,8 +359,9 @@ void opcontrol() {
         pros::screen::print(TEXT_MEDIUM, 6, "Left Motor 2 (Port 5) Power: %dW", leftPower2);
         pros::screen::print(TEXT_MEDIUM, 7, "Left Motor 3 (Port 6) Power: %dW", leftPower3);
         pros::screen::print(TEXT_MEDIUM, 8, "Battery Percentage: %d %", batteryPercent);
-        pros::screen::print(TEXT_SMALL, 9, "Battery Percentage: %d %", red);
-        pros::screen::print(TEXT_SMALL, 10, "Battery Percentage: %d %", green);
+        pros::screen::print(TEXT_SMALL, 9, "Red: %d %", red);
+        pros::screen::print(TEXT_SMALL, 10, "Green: %d %", green);
+
 
 		int tankLeft = controller.get_analog(ANALOG_LEFT_Y); // the left analog stick controls the left side of the drive train
         int tankRight = controller.get_analog(ANALOG_RIGHT_Y); // the right analog stick controls the left side of the drive train        
@@ -311,12 +407,20 @@ void opcontrol() {
             roller4.move(0);
         }
         
-        if(controller.get_digital(DIGITAL_B) || controller.get_digital(DIGITAL_Y)){
+        if(controller.get_digital(DIGITAL_Y)){
             toungeMech.set_value(true);
         }
-        else if(controller.get_digital(DIGITAL_DOWN) || controller.get_digital(DIGITAL_RIGHT)){
+        else if(controller.get_digital(DIGITAL_RIGHT)){
             toungeMech.set_value(false);
         }
+
+        if(controller.get_digital(DIGITAL_DOWN)){
+            wing.set_value(true);
+        }
+        else if(controller.get_digital(DIGITAL_B)){
+            wing.set_value(false);
+        }
+        
 
 		pros::delay(25); // wait 25ms to save resources
 	}
