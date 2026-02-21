@@ -5,48 +5,47 @@
 int red, green;
 bool autonSelectorDone = false, rightAuton = false, leftAuton = false, offTheLineAuton = false, skillsAuton = false;
 
-pros::Controller controller(pros::E_CONTROLLER_MASTER); // sets up controller
+pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 pros::Motor right1(1);
 pros::Motor right2(2);
 pros::Motor right3(-3);
-pros::Motor left1(-4);
+pros::Motor left1(-13);
 pros::Motor left2(5);
 pros::Motor left3(-6);
 
 pros::MotorGroup rightDrive({1, 2, -3}, pros::MotorGearset::blue); // creates the right drivetrain motor group with forwards ports 1 & 3 and backwards port 2
-pros::MotorGroup leftDrive({-4, 5, -6}, pros::MotorGearset::blue); // creates the left drivetrain motor group with forwards port 5 and backwards ports 4 & 6
+pros::MotorGroup leftDrive({-13, 5, -6}, pros::MotorGearset::blue); // creates the left drivetrain motor group with forwards port 5 and backwards ports 4 & 6
 
-pros::Motor roller1(7);
+pros::Motor intake(-7);
+pros::Motor roller1(-4);
 pros::Motor roller2(8);
-pros::Motor roller3(9);
-pros::Motor roller4(11);
 
-pros::IMU imu(10);
+pros::IMU imu(11);
 
 pros::Rotation verticalRotationSensor(-12);
 
-pros::adi::DigitalOut toungeMech('H');
-pros::adi::DigitalOut wing('G');
+pros::adi::DigitalOut toungeMech('A');
+pros::adi::DigitalOut wing('B');
 
 lemlib::TrackingWheel verticalTrackingWheel(&verticalRotationSensor, lemlib::Omniwheel::NEW_275, 0);
 
-// drivetrain settingsMore actions
+// drivetrain settings
 lemlib::Drivetrain drivetrain(&leftDrive, // left motor group
 							  &rightDrive, // right motor group
-							  12.5, // 12.5 inch track width (NEEDS TO BE MEASURED)
+							  12.5, // 12.5 inch track width
 							  lemlib::Omniwheel::NEW_325, // using new 3.25" omnis
 							  480, // drivetrain rpm is 480 rpm
-							  2 // horizontal drift is 2 (for now)
+							  2 // horizontal drift is 2
 );
 
 
 // odometry settings
-lemlib::OdomSensors sensors(&verticalTrackingWheel, // vertical tracking wheel 1, set to null (temporary)
+lemlib::OdomSensors sensors(&verticalTrackingWheel, // vertical tracking wheel 1
   							nullptr, // vertical tracking wheel 2, set to null
-  							nullptr, // horizontal tracking wheel 1, set to null (temporary hopefully)
+  							nullptr, // horizontal tracking wheel 1, set to null
   							nullptr, // horizontal tracking wheel 2, set to null
-  							&imu // inertial sensor, set to null (temporary)
+  							&imu // inertial sensor
 );
 
 
@@ -55,22 +54,22 @@ lemlib::ControllerSettings lateral_controller(15, // proportional gain (kP)
                                               1, // integral gain (kI)
                                               80, // derivative gain (kD)
                                               1.275, // anti windup
-                                              0, // small error range, in inches
-                                              0, // small error range timeout, in milliseconds
-                                              0, // large error range, in inches
-                                              0, // large error range timeout, in milliseconds
-                                              0 // maximum acceleration (slew)
+                                              1, // small error range, in inches
+                                              100, // small error range timeout, in milliseconds
+                                              3, // large error range, in inches
+                                              500, // large error range timeout, in milliseconds
+                                              20 // maximum acceleration (slew)
 );
 
 // angular PID controller
 lemlib::ControllerSettings angular_controller(7, // proportional gain (kP)
                                               0, // integral gain (kI)
                                               100, // derivative gain (kD)
-                                              0, // anti windup
-                                              0, // small error range, in inches
-                                              0, // small error range timeout, in milliseconds
-                                              0, // large error range, in inches
-                                              0, // large error range timeout, in milliseconds
+                                              3, // anti windup
+                                              1, // small error range, in inches
+                                              100, // small error range timeout, in milliseconds
+                                              3, // large error range, in inches
+                                              500, // large error range timeout, in milliseconds
                                               0 // maximum acceleration (slew)
 );
 
@@ -188,83 +187,121 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+    
     if(rightAuton == true){
         chassis.setPose(0, 0, 0);
-        chassis.moveToPoint(0, 30, 1500, {.maxSpeed = 80});
+        intake.move_absolute(-400, 1000);
+        chassis.moveToPoint(0, 32, 1500, {.maxSpeed = 80});
         chassis.turnToHeading(90, 750, {.maxSpeed = 100});
         toungeMech.set_value(true);
         pros::delay(500);
-        chassis.moveToPoint(13, 30, 1000, {.maxSpeed = 60});
-        roller1.move_absolute(5000, 1000);
-        roller2.move_absolute(-8000, 1000);
+        chassis.moveToPoint(8, 32, 1000, {.maxSpeed = 60});
+        intake.move_absolute(7600, 1000);
         pros::delay(3500);
-        chassis.moveToPoint(-5, 30, 2000, {.forwards = false, .maxSpeed = 80});
-        pros::delay(500);
+        chassis.moveToPoint(-18, 32, 2000, {.forwards = false, .maxSpeed = 80});
+        pros::delay(750);
         toungeMech.set_value(false);
-        roller1.move_absolute(6500, 1000);
-        pros::delay(1000);
-        chassis.turnToHeading(-90, 1000, {.maxSpeed = 100});
-        chassis.moveToPoint(-18, 30, 1500, {.maxSpeed = 80});
-        pros::delay(2000);
-        roller1.move_absolute(14500, 1000);
-        roller2.move_absolute(0, 1000);
-        roller3.move_absolute(8000, 1000);
-        roller4.move_absolute(8000, 1000);
+        intake.move_absolute(15600, 1000);
+        roller1.move_absolute(8000, 1000);
+        roller2.move_absolute(8000, 1000);
     }
     else if(leftAuton == true){
         chassis.setPose(0, 0, 0);
-        chassis.moveToPoint(0, 30, 1500, {.maxSpeed = 80});
+        intake.move_absolute(-400, 1000);
+        chassis.moveToPoint(0, 32, 1500, {.maxSpeed = 80});
         chassis.turnToHeading(-90, 750, {.maxSpeed = 100});
         toungeMech.set_value(true);
         pros::delay(500);
-        chassis.moveToPoint(-13, 30, 1000, {.maxSpeed = 60});
-        roller1.move_absolute(5000, 1000);
-        roller2.move_absolute(-8000, 1000);
+        chassis.moveToPoint(-8, 32, 1000, {.maxSpeed = 60});
+        intake.move_absolute(7600, 1000);
         pros::delay(3500);
-        chassis.moveToPoint(5, 30, 2000, {.forwards = false, .maxSpeed = 80});
-        pros::delay(500);
+        chassis.moveToPoint(18, 32, 2000, {.forwards = false, .maxSpeed = 80});
+        pros::delay(750);
         toungeMech.set_value(false);
-        roller1.move_absolute(6500, 1000);
-        pros::delay(1000);
-        chassis.turnToHeading(90, 1000, {.maxSpeed = 100});
-        chassis.moveToPoint(18, 30, 1500, {.maxSpeed = 80});
-        pros::delay(2000);
-        roller1.move_absolute(14500, 1000);
-        roller2.move_absolute(0, 1000);
-        roller3.move_absolute(8000, 1000);
-        roller4.move_absolute(8000, 1000);
+        intake.move_absolute(15600, 1000);
+        roller1.move_absolute(8000, 1000);
+        roller2.move_absolute(8000, 1000);
     }
     else if(offTheLineAuton == true){
         chassis.setPose(0, 0, 0);
         chassis.moveToPoint(0, 10, 1500, {.maxSpeed = 60});
+        intake.move_absolute(-400, 1000);
     }
     else if(skillsAuton == true){
+        //intake.move_absolute(1000, 127);
+
         chassis.setPose(0, 0, 0);
-        chassis.moveToPoint(0, 30, 1500, {.maxSpeed = 80});
-        chassis.turnToHeading(90, 750, {.maxSpeed = 100});
+        intake.move_absolute(-400, 1000);
+        chassis.moveToPoint(0, 32, 1500, {.maxSpeed = 60});
+        chassis.turnToHeading(90, 750, {.maxSpeed = 60});
         toungeMech.set_value(true);
         pros::delay(500);
-        chassis.moveToPoint(13, 30, 1000, {.maxSpeed = 60});
-        roller1.move_absolute(10000, 1000);
-        roller2.move_absolute(-16000, 1000);
-        pros::delay(7000);
-        chassis.moveToPoint(-5, 30, 2000, {.forwards = false, .maxSpeed = 80});
-        pros::delay(500);
+
+        chassis.moveToPoint(8, 32, 1000, {.maxSpeed = 60});
+        intake.move_absolute(11600, 1000);
+        pros::delay(1000);
+        chassis.moveToPoint(10, 32, 1000, {.maxSpeed = 60});
+        pros::delay(2500);
+
+        chassis.moveToPoint(-18, 32, 2000, {.forwards = false, .maxSpeed = 60});
+        pros::delay(750);
         toungeMech.set_value(false);
-        roller1.move_absolute(13000, 1000);
-        pros::delay(2000);
-        chassis.turnToHeading(-90, 1000, {.maxSpeed = 100});
-        chassis.moveToPoint(-18, 30, 1500, {.maxSpeed = 80});
-        pros::delay(2000);
-        roller1.move_absolute(29000, 1000);
-        roller2.move_absolute(0, 1000);
-        roller3.move_absolute(16000, 1000);
-        roller4.move_absolute(16000, 1000);
-        pros::delay(10000);
-        chassis.moveToPoint(0, 30, 2000, {.forwards = false, .maxSpeed = 80});
-        chassis.turnToHeading(180, 1000, {.maxSpeed = 100});
-        chassis.moveToPoint(0, -20, 3000, {.minSpeed = 100});
+
+        intake.move_absolute(19600, 1000);
+        roller1.move_absolute(8000, 1000);
+        roller2.move_absolute(8000, 1000);
+        pros::delay(5000);
+
+        /*
+        chassis.moveToPoint(0, 32, 1000, {.maxSpeed = 60});
+        pros::delay(1000);
+
+        chassis.moveToPoint(8, 32, 1000, {.maxSpeed = 60});
+        intake.move_absolute(32000, 1000);
+        pros::delay(1000);
+        chassis.moveToPoint(10, 32, 1000, {.maxSpeed = 60});
+        pros::delay(2500);
+
+        chassis.moveToPoint(-18, 32, 2000, {.forwards = false, .maxSpeed = 60});
+        pros::delay(750);
+        toungeMech.set_value(false);
+
+        intake.move_absolute(40000, 1000);
+        roller1.move_absolute(16000, 1000);
+        roller2.move_absolute(16000, 1000);
+        pros::delay(5000);
+        */
+
+        chassis.moveToPoint(-20, 32, 1000, {.maxSpeed = 60});
+        chassis.moveToPoint(-10, 32, 1000, {.maxSpeed = 60});
+        chassis.turnToHeading(0, 750, {.maxSpeed = 60});
+        chassis.moveToPoint(-10, 10, 1000, {.forwards = false, .maxSpeed = 60});
+        chassis.turnToHeading(90, 750, {.maxSpeed = 60});
+
+        chassis.moveToPoint(-90, 10, 6000, {.forwards = false, .maxSpeed = 60});
+        chassis.turnToHeading(0, 750, {.maxSpeed = 60});
+        chassis.moveToPoint(-90, 32, 1500, {.maxSpeed = 60});
+        chassis.turnToHeading(-90, 750, {.maxSpeed = 60});
+        toungeMech.set_value(true);
+        pros::delay(500);
+
+        chassis.moveToPoint(-105, 32, 1000, {.maxSpeed = 60});
+        intake.move_absolute(31600, 1000);
+        pros::delay(1000);
+        chassis.moveToPoint(-107, 32, 1000, {.maxSpeed = 60});
+        pros::delay(2500);
+
+        chassis.moveToPoint(-80, 32, 2000, {.forwards = false, .maxSpeed = 60});
+        pros::delay(750);
+        toungeMech.set_value(false);
+
+        intake.move_absolute(39600, 1000);
+        roller1.move_absolute(16000, 1000);
+        roller2.move_absolute(16000, 1000);
+        pros::delay(5000);
+
     }
+    
 }
 
 /**
@@ -294,19 +331,24 @@ void opcontrol() {
         if(controller.get_digital(DIGITAL_A)){
             rightAuton = true;
             autonSelectorDone = true;
+            pros::delay(250);
         }
         else if(controller.get_digital(DIGITAL_B)){
             leftAuton = true;
             autonSelectorDone = true;
+            pros::delay(250);
         }
         else if(controller.get_digital(DIGITAL_X)){
             offTheLineAuton = true;
             autonSelectorDone = true;
+            pros::delay(250);
         }
         else if(controller.get_digital(DIGITAL_Y)){
             skillsAuton = true;
             autonSelectorDone = true;
+            pros::delay(250);
         }
+        pros::delay(25);
     }
 
 	while (autonSelectorDone == true) {
@@ -363,61 +405,47 @@ void opcontrol() {
         pros::screen::print(TEXT_SMALL, 10, "Green: %d %", green);
 
 
+
 		int tankLeft = controller.get_analog(ANALOG_LEFT_Y); // the left analog stick controls the left side of the drive train
         int tankRight = controller.get_analog(ANALOG_RIGHT_Y); // the right analog stick controls the left side of the drive train        
         chassis.tank(tankLeft, tankRight); // creates a tank drive scheme
-        /*
-        if(controller.get_digital(DIGITAL_R1)){
-            roller1.move(127);
-            roller3.move(-127);
-        }
-        else if(controller.get_digital(DIGITAL_R2)){
-            roller1.move(-127);
-            roller3.move(127);
-        }
-        else{
-            roller1.move(0);
-            roller3.move(0);
-        }
-        */
+
 
         if(controller.get_digital(DIGITAL_R1)){
-            roller1.move(127);
-            roller2.move(-127);
+            intake.move(127);
         } 
         else if(controller.get_digital(DIGITAL_R2)){
-            roller1.move(127);
-            roller2.move(127);
-            roller3.move(-127);
+            intake.move(-127);
         }
-        else if(controller.get_digital(DIGITAL_L1)){
-            roller1.move(-127);
+        else{
+            intake.move(0);
+        }
+
+        if(controller.get_digital(DIGITAL_L1)){
+            roller1.move(127);
             roller2.move(127);
         }
         else if(controller.get_digital(DIGITAL_L2)){
             roller1.move(127);
-            roller2.move(127);
-            roller3.move(127);
-            roller4.move(127);
+            roller2.move(-80);
         }
         else{
             roller1.move(0);
             roller2.move(0);
-            roller3.move(0);
-            roller4.move(0);
         }
         
         if(controller.get_digital(DIGITAL_Y)){
             toungeMech.set_value(true);
         }
-        else if(controller.get_digital(DIGITAL_RIGHT)){
+        else if(controller.get_digital(DIGITAL_B)){
             toungeMech.set_value(false);
         }
 
-        if(controller.get_digital(DIGITAL_DOWN)){
+        
+        if(controller.get_digital(DIGITAL_RIGHT)){
             wing.set_value(true);
         }
-        else if(controller.get_digital(DIGITAL_B)){
+        else if(controller.get_digital(DIGITAL_DOWN)){
             wing.set_value(false);
         }
         
