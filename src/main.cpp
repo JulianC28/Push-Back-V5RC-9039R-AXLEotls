@@ -190,55 +190,59 @@ void autonomous() {
     
     if(rightAuton == true){
         chassis.setPose(0, 0, 0);
-        intake.move_absolute(-400, 1000);
+        intake.move_absolute(400, 1000);
         chassis.moveToPoint(0, 32, 1500, {.maxSpeed = 80});
         chassis.turnToHeading(90, 750, {.maxSpeed = 100});
         toungeMech.set_value(true);
         pros::delay(500);
+
         chassis.moveToPoint(8, 32, 1000, {.maxSpeed = 60});
-        intake.move_absolute(7600, 1000);
-        pros::delay(3500);
+        intake.move_absolute(8400, 1000);
+        pros::delay(1000);
+        chassis.moveToPoint(10, 32, 1000, {.maxSpeed = 60});
+        pros::delay(2500);
+
         chassis.moveToPoint(-18, 32, 2000, {.forwards = false, .maxSpeed = 80});
         pros::delay(750);
         toungeMech.set_value(false);
-        intake.move_absolute(15600, 1000);
+        intake.move_absolute(16400, 1000);
         roller1.move_absolute(8000, 1000);
         roller2.move_absolute(8000, 1000);
     }
     else if(leftAuton == true){
         chassis.setPose(0, 0, 0);
-        intake.move_absolute(-400, 1000);
+        intake.move_absolute(400, 1000);
         chassis.moveToPoint(0, 32, 1500, {.maxSpeed = 80});
         chassis.turnToHeading(-90, 750, {.maxSpeed = 100});
         toungeMech.set_value(true);
         pros::delay(500);
         chassis.moveToPoint(-8, 32, 1000, {.maxSpeed = 60});
-        intake.move_absolute(7600, 1000);
+        intake.move_absolute(8400, 1000);
         pros::delay(3500);
         chassis.moveToPoint(18, 32, 2000, {.forwards = false, .maxSpeed = 80});
         pros::delay(750);
         toungeMech.set_value(false);
-        intake.move_absolute(15600, 1000);
+        intake.move_absolute(16400, 1000);
         roller1.move_absolute(8000, 1000);
         roller2.move_absolute(8000, 1000);
     }
     else if(offTheLineAuton == true){
         chassis.setPose(0, 0, 0);
-        chassis.moveToPoint(0, 10, 1500, {.maxSpeed = 60});
-        intake.move_absolute(-400, 1000);
+        chassis.moveToPoint(0, 3, 1500, {.maxSpeed = 60});
+        intake.move_absolute(400, 1000);
     }
     else if(skillsAuton == true){
         //intake.move_absolute(1000, 127);
 
         chassis.setPose(0, 0, 0);
-        intake.move_absolute(-400, 1000);
+        intake.move_absolute(400, 1000);
         chassis.moveToPoint(0, 32, 1500, {.maxSpeed = 60});
         chassis.turnToHeading(90, 750, {.maxSpeed = 60});
         toungeMech.set_value(true);
         pros::delay(500);
 
         chassis.moveToPoint(8, 32, 1000, {.maxSpeed = 60});
-        intake.move_absolute(11600, 1000);
+        intake.move_absolute(12400, 1000);
         pros::delay(1000);
         chassis.moveToPoint(10, 32, 1000, {.maxSpeed = 60});
         pros::delay(2500);
@@ -247,7 +251,7 @@ void autonomous() {
         pros::delay(750);
         toungeMech.set_value(false);
 
-        intake.move_absolute(19600, 1000);
+        intake.move_absolute(20400, 1000);
         roller1.move_absolute(8000, 1000);
         roller2.move_absolute(8000, 1000);
         pros::delay(5000);
@@ -286,7 +290,7 @@ void autonomous() {
         pros::delay(500);
 
         chassis.moveToPoint(-105, 32, 1000, {.maxSpeed = 60});
-        intake.move_absolute(31600, 1000);
+        intake.move_absolute(32400, 1000);
         pros::delay(1000);
         chassis.moveToPoint(-107, 32, 1000, {.maxSpeed = 60});
         pros::delay(2500);
@@ -295,7 +299,7 @@ void autonomous() {
         pros::delay(750);
         toungeMech.set_value(false);
 
-        intake.move_absolute(39600, 1000);
+        intake.move_absolute(40400, 1000);
         roller1.move_absolute(16000, 1000);
         roller2.move_absolute(16000, 1000);
         pros::delay(5000);
